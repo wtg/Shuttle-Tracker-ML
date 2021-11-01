@@ -14,7 +14,6 @@ final class Downloader {
 	private let fileHandle: FileHandle
 	
 	func saveSnapshot() throws {
-		print("[\(Date.now)] Saving snapshot...")
 		var rawString = try String(contentsOf: Self.remoteURL)
 		rawString.removeAll { (character) in
 			return character.isWhitespace
@@ -22,6 +21,7 @@ final class Downloader {
 		guard rawString != "[]" else {
 			return
 		}
+		print("[\(Date.now)] Saving snapshot...")
 		rawString.append(contentsOf: "\n")
 		guard let data = rawString.data(using: .utf8) else {
 			return
