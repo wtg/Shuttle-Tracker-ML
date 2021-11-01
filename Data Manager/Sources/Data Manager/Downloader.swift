@@ -34,7 +34,7 @@ final class Downloader {
 		guard rawString != "[]" else {
 			return
 		}
-		print("[\(Date.now)] Saving snapshot...")
+		print("[\(Date())] Saving snapshot...")
 		rawString.append(contentsOf: "\n")
 		guard let data = rawString.data(using: .utf8) else {
 			return

@@ -48,7 +48,7 @@ import ArgumentParser
 			throw Errors.downloaderInitializationFailed
 		}
 		print("Running...")
-		Timer.scheduledTimer(withTimeInterval: self.interval, repeats: true) { (_) in
+		_ = Timer.scheduledTimer(withTimeInterval: self.interval, repeats: true) { (_) in
 			do {
 				try self.downloader!.saveSnapshot()
 			} catch {
