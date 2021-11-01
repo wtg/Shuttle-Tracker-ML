@@ -7,6 +7,10 @@
 
 import Foundation
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif // canImport(FoundationNetworking)
+
 final class Downloader {
 	
 	private static let remoteURL = URL(string: "https://shuttletracker.app/buses")!
