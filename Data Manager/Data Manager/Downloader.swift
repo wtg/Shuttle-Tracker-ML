@@ -13,6 +13,19 @@ final class Downloader {
 	
 	private let fileHandle: FileHandle
 	
+	init?(savingDataAtPath path: String) throws {
+		guard FileManager.default.isWritableFile(atPath: path) else {
+			return nil
+		}
+		let localURL = URL(fileURLWithPath: path)
+		self.fileHandle = try FileHandle(forUpdating: localURL)
+	}
+	
+	deinit {
+		print("Stopping...")
+		try! self.fileHandle.close()
+	}
+	
 	func saveSnapshot() throws {
 		var rawString = try String(contentsOf: Self.remoteURL)
 		rawString.removeAll { (character) in
@@ -28,19 +41,6 @@ final class Downloader {
 		}
 		try self.fileHandle.seekToEnd()
 		try self.fileHandle.write(contentsOf: data)
-	}
-	
-	init?(savingDataAtPath path: String) throws {
-		guard FileManager.default.isWritableFile(atPath: path) else {
-			return nil
-		}
-		let localURL = URL(fileURLWithPath: path)
-		self.fileHandle = try FileHandle(forUpdating: localURL)
-	}
-	
-	deinit {
-		print("Stopping...")
-		try! self.fileHandle.close()
 	}
 	
 }

@@ -7,9 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C03F8643272F653C005C2C99 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03F8642272F653C005C2C99 /* main.swift */; };
+		C03F8643272F653C005C2C99 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03F8642272F653C005C2C99 /* DataManager.swift */; };
 		C03F864A272F662A005C2C99 /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03F8649272F662A005C2C99 /* Downloader.swift */; };
 		C03F864C272F6797005C2C99 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03F864B272F6797005C2C99 /* Utilities.swift */; };
+		C03F8652272F8499005C2C99 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = C03F8651272F8499005C2C99 /* ArgumentParser */; };
+		C03F8654272F8788005C2C99 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03F8653272F8788005C2C99 /* Errors.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,9 +28,10 @@
 
 /* Begin PBXFileReference section */
 		C03F863F272F653C005C2C99 /* Data Manager */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Data Manager"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C03F8642272F653C005C2C99 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		C03F8642272F653C005C2C99 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		C03F8649272F662A005C2C99 /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
 		C03F864B272F6797005C2C99 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		C03F8653272F8788005C2C99 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C03F8652272F8499005C2C99 /* ArgumentParser in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,8 +65,9 @@
 		C03F8641272F653C005C2C99 /* Data Manager */ = {
 			isa = PBXGroup;
 			children = (
-				C03F8642272F653C005C2C99 /* main.swift */,
+				C03F8642272F653C005C2C99 /* DataManager.swift */,
 				C03F8649272F662A005C2C99 /* Downloader.swift */,
+				C03F8653272F8788005C2C99 /* Errors.swift */,
 				C03F864B272F6797005C2C99 /* Utilities.swift */,
 			);
 			path = "Data Manager";
@@ -84,6 +89,9 @@
 			dependencies = (
 			);
 			name = "Data Manager";
+			packageProductDependencies = (
+				C03F8651272F8499005C2C99 /* ArgumentParser */,
+			);
 			productName = "Data Manager";
 			productReference = C03F863F272F653C005C2C99 /* Data Manager */;
 			productType = "com.apple.product-type.tool";
@@ -112,6 +120,9 @@
 				Base,
 			);
 			mainGroup = C03F8636272F653C005C2C99;
+			packageReferences = (
+				C03F8650272F8499005C2C99 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
+			);
 			productRefGroup = C03F8640272F653C005C2C99 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -127,8 +138,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				C03F864C272F6797005C2C99 /* Utilities.swift in Sources */,
+				C03F8654272F8788005C2C99 /* Errors.swift in Sources */,
 				C03F864A272F662A005C2C99 /* Downloader.swift in Sources */,
-				C03F8643272F653C005C2C99 /* main.swift in Sources */,
+				C03F8643272F653C005C2C99 /* DataManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,6 +304,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C03F8650272F8499005C2C99 /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-argument-parser.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C03F8651272F8499005C2C99 /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C03F8650272F8499005C2C99 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C03F8637272F653C005C2C99 /* Project object */;
 }
