@@ -47,12 +47,10 @@ import ArgumentParser
 			errorPrint("Couldn't initialize downloader; is the specified path writable?")
 			throw Errors.downloaderInitializationFailed
 		}
-		print("Running...")
+		print("[\(Date.now)] Starting...")
 		_ = Timer.scheduledTimer(withTimeInterval: self.interval, repeats: true) { (_) in
-			do {
-				try self.downloader!.saveSnapshot()
-			} catch {
-				errorPrint("Failed to save snapshot")
+			Task {
+				try await self.downloader!.saveSnapshot()
 			}
 		}
 		RunLoop.current.run()

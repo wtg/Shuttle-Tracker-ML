@@ -13,9 +13,11 @@ import FoundationNetworking
 
 final class Downloader {
 	
-	private static let remoteURL = URL(string: "https://shuttletracker.app/buses")!
+	private static let remoteURL = URL(string: "https://staging.shuttletracker.app/buses")!
 	
 	private let fileHandle: FileHandle
+	
+	private var recentBuses = Set<Bus>()
 	
 	init?(savingDataAtPath path: String) throws {
 		guard FileManager.default.isWritableFile(atPath: path) else {
@@ -26,25 +28,28 @@ final class Downloader {
 	}
 	
 	deinit {
-		print("Stopping...")
+		print("[\(Date.now)] Stopping...")
 		try! self.fileHandle.close()
 	}
 	
-	func saveSnapshot() throws {
-		var rawString = try String(contentsOf: Self.remoteURL)
-		rawString.removeAll { (character) in
-			return character.isWhitespace
+	func saveSnapshot() async throws {
+		let session = URLSession(configuration: .ephemeral)
+		let (data, _) = try await session.data(from: Self.remoteURL)
+		let decoder = JSONDecoder()
+		decoder.dateDecodingStrategy = .iso8601
+		let buses = try decoder.decode([Bus].self, from: data)
+		for bus in buses {
+			if !self.recentBuses.contains(bus) && bus.location.date.timeIntervalSinceNow > -30 {
+				let line = "\(bus.id),\(bus.location.coordinate.latitude),\(bus.location.coordinate.longitude),\(bus.location.date),\(bus.location.type)\n"
+				guard let lineData = line.data(using: .utf8) else {
+					continue
+				}
+				print("[\(Date.now)] Saving snapshot of bus \(bus.id)...")
+				try self.fileHandle.seekToEnd()
+				try self.fileHandle.write(contentsOf: lineData)
+			}
 		}
-		guard rawString != "[]" else {
-			return
-		}
-		print("[\(Date())] Saving snapshot...")
-		rawString.append(contentsOf: "\n")
-		guard let data = rawString.data(using: .utf8) else {
-			return
-		}
-		try self.fileHandle.seekToEnd()
-		try self.fileHandle.write(contentsOf: data)
+		self.recentBuses = Set(buses)
 	}
 	
 }

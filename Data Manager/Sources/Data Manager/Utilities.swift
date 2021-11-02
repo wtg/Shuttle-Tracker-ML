@@ -33,3 +33,15 @@ extension UnsafeMutablePointer: TextOutputStream where Pointee == FILE {
 	}
 	
 }
+
+#if os(Linux)
+extension Date {
+	
+	static var now: Date {
+		get {
+			return Date()
+		}
+	}
+	
+}
+#endif // os(Linux)
