@@ -7,6 +7,10 @@
 
 import Foundation
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif // canImport(FoundationNetworking)
+
 func errorPrint(_ items: Any...) {
 	for item in items.dropLast() {
 		print(item, terminator: " ", to: &stderr)
