@@ -13,7 +13,7 @@ import FoundationNetworking
 
 final class Downloader {
 	
-	private static let remoteURL = URL(string: "https://staging.shuttletracker.app/buses")!
+	private static let remoteURL = URL(string: "https://shuttletracker.app/buses")!
 	
 	private let fileHandle: FileHandle
 	
