@@ -23,18 +23,20 @@ import ArgumentParser
 	@Option(name: .shortAndLong, help: "The interval (in seconds) between polls of the remote API.") private var interval: TimeInterval
 	
 	func run() throws {
-		signal(SIGINT, SIG_IGN)
-		signal(SIGQUIT, SIG_IGN)
-		signal(SIGTERM, SIG_IGN)
-		let sigintSource = DispatchSource.makeSignalSource(signal: SIGINT)
-		let sigquitSource = DispatchSource.makeSignalSource(signal: SIGQUIT)
-		let sigtermSource = DispatchSource.makeSignalSource(signal: SIGTERM)
-		sigintSource.setEventHandler(handler: self.shutDown)
-		sigquitSource.setEventHandler(handler: self.shutDown)
-		sigtermSource.setEventHandler(handler: self.shutDown)
-		sigintSource.resume()
-		sigquitSource.resume()
-		sigtermSource.resume()
+		if ProcessInfo.processInfo.environment["SWIFT_WINDOWS"] != "TRUE" {
+			signal(SIGINT, SIG_IGN)
+			signal(SIGQUIT, SIG_IGN)
+			signal(SIGTERM, SIG_IGN)
+			let sigintSource = DispatchSource.makeSignalSource(signal: SIGINT)
+			let sigquitSource = DispatchSource.makeSignalSource(signal: SIGQUIT)
+			let sigtermSource = DispatchSource.makeSignalSource(signal: SIGTERM)
+			sigintSource.setEventHandler(handler: self.shutDown)
+			sigquitSource.setEventHandler(handler: self.shutDown)
+			sigtermSource.setEventHandler(handler: self.shutDown)
+			sigintSource.resume()
+			sigquitSource.resume()
+			sigtermSource.resume()
+		}
 		let extendedPath = self.outputPath.expandingTildeInPath
 		if !FileManager.default.fileExists(atPath: extendedPath) {
 			guard FileManager.default.createFile(atPath: extendedPath, contents: nil) else {

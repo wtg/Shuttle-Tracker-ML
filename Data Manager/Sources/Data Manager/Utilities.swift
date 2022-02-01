@@ -12,11 +12,20 @@ import FoundationNetworking
 #endif // canImport(FoundationNetworking)
 
 func errorPrint(_ items: Any...) {
-	for item in items.dropLast() {
-		print(item, terminator: " ", to: &stderr)
-	}
-	if let lastItem = items.last {
-		print(lastItem, to: &stderr)
+	if ProcessInfo.processInfo.environment["SWIFT_WINDOWS"] == "TRUE" {
+		for item in items.dropLast() {
+			print(item, terminator: " ")
+		}
+		if let lastItem = items.last {
+			print(lastItem)
+		}
+	} else {
+		for item in items.dropLast() {
+			print(item, terminator: " ", to: &stderr)
+		}
+		if let lastItem = items.last {
+			print(lastItem, to: &stderr)
+		}
 	}
 }
 
