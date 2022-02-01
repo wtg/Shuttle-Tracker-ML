@@ -28,13 +28,23 @@ final class Downloader {
 	}
 	
 	deinit {
-		print("[\(Date.now)] Stopping...")
+		print("[\(Date())] Stopping...")
 		try! self.fileHandle.close()
 	}
 	
 	func saveSnapshot() async throws {
 		let session = URLSession(configuration: .ephemeral)
-		let (data, _) = try await session.data(from: Self.remoteURL)
+		let data: Data = try await withCheckedThrowingContinuation { (continuation) in
+			session.dataTask(with: Self.remoteURL) { (data, _, error) in
+				if let data = data {
+					continuation.resume(returning: data)
+				} else if let error = error {
+					continuation.resume(throwing: error)
+				} else {
+					fatalError()
+				}
+			}
+		}
 		let decoder = JSONDecoder()
 		decoder.dateDecodingStrategy = .iso8601
 		let buses = try decoder.decode([Bus].self, from: data)
@@ -44,7 +54,7 @@ final class Downloader {
 				guard let lineData = line.data(using: .utf8) else {
 					continue
 				}
-				print("[\(Date.now)] Saving snapshot of bus \(bus.id)...")
+				print("[\(Date())] Saving snapshot of bus \(bus.id)...")
 				try self.fileHandle.seekToEnd()
 				try self.fileHandle.write(contentsOf: lineData)
 			}

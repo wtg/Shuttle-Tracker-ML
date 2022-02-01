@@ -23,7 +23,7 @@ import ArgumentParser
 	@Option(name: .shortAndLong, help: "The interval (in seconds) between polls of the remote API.") private var interval: TimeInterval
 	
 	func run() throws {
-		if ProcessInfo.processInfo.environment["SWIFT_WINDOWS"] != "TRUE" {
+		#if os(macOS) || os(Linux)
 			signal(SIGINT, SIG_IGN)
 			signal(SIGQUIT, SIG_IGN)
 			signal(SIGTERM, SIG_IGN)
@@ -36,7 +36,7 @@ import ArgumentParser
 			sigintSource.resume()
 			sigquitSource.resume()
 			sigtermSource.resume()
-		}
+		#endif // os(macOS) || os(Linux)
 		let extendedPath = self.outputPath.expandingTildeInPath
 		if !FileManager.default.fileExists(atPath: extendedPath) {
 			guard FileManager.default.createFile(atPath: extendedPath, contents: nil) else {
@@ -49,7 +49,7 @@ import ArgumentParser
 			errorPrint("Couldn't initialize downloader; is the specified path writable?")
 			throw Errors.downloaderInitializationFailed
 		}
-		print("[\(Date.now)] Starting...")
+		print("[\(Date())] Starting...")
 		_ = Timer.scheduledTimer(withTimeInterval: self.interval, repeats: true) { (_) in
 			Task {
 				try await self.downloader!.saveSnapshot()
