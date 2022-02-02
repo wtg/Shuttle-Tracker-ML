@@ -34,17 +34,7 @@ final class Downloader {
 	
 	func saveSnapshot() async throws {
 		let session = URLSession(configuration: .ephemeral)
-		let data: Data = try await withCheckedThrowingContinuation { (continuation) in
-			session.dataTask(with: Self.remoteURL) { (data, _, error) in
-				if let data = data {
-					continuation.resume(returning: data)
-				} else if let error = error {
-					continuation.resume(throwing: error)
-				} else {
-					fatalError()
-				}
-			}
-		}
+		let (data, _) = try await session.data(from: Self.remoteURL)
 		let decoder = JSONDecoder()
 		decoder.dateDecodingStrategy = .iso8601
 		let buses = try decoder.decode([Bus].self, from: data)

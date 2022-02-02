@@ -47,7 +47,7 @@ extension UnsafeMutablePointer: TextOutputStream where Pointee == FILE {
 	
 }
 
-#if os(Linux)
+#if !os(macOS)
 extension Date {
 	
 	static var now: Date {
@@ -74,4 +74,4 @@ extension URLSession {
 	}
 	
 }
-#endif // os(Linux)
+#endif // !os(macOS)
