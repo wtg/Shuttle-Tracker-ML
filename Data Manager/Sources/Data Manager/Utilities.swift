@@ -12,21 +12,21 @@ import FoundationNetworking
 #endif // canImport(FoundationNetworking)
 
 func errorPrint(_ items: Any...) {
-	#if os(macOS) || os(Linux)
-		for item in items.dropLast() {
-			print(item, terminator: " ", to: &stderr)
-		}
-		if let lastItem = items.last {
-			print(lastItem, to: &stderr)
-		}
-	#else // os(macOS) || os(Linux)
+	#if os(Windows)
 		for item in items.dropLast() {
 			print(item, terminator: " ")
 		}
 		if let lastItem = items.last {
 			print(lastItem)
 		}
-	#endif // os(macOS) || os(Linux)
+	#else // os(Windows)
+		for item in items.dropLast() {
+			print(item, terminator: " ", to: &stderr)
+		}
+		if let lastItem = items.last {
+			print(lastItem, to: &stderr)
+		}
+	#endif // os(Windows)
 }
 
 extension String {
@@ -46,6 +46,8 @@ extension UnsafeMutablePointer: TextOutputStream where Pointee == FILE {
 	}
 	
 }
+
+// MARK: Platform Compatibility
 
 #if !os(macOS)
 extension Date {

@@ -40,16 +40,16 @@ import ArgumentParser
 		let extendedPath = self.outputPath.expandingTildeInPath
 		if !FileManager.default.fileExists(atPath: extendedPath) {
 			guard FileManager.default.createFile(atPath: extendedPath, contents: nil) else {
-				errorPrint("Couldn't create data file; do you have the appropriate permissions?")
+				errorPrint("Couldn’t create data file; do you have the appropriate permissions?")
 				throw Errors.dataFileCreationFailed
 			}
 		}
 		self.downloader = try Downloader(savingDataAtPath: extendedPath)
-		guard downloader != nil else {
-			errorPrint("Couldn't initialize downloader; is the specified path writable?")
+		guard self.downloader != nil else {
+			errorPrint("Couldn’t initialize downloader; is the specified path writable?")
 			throw Errors.downloaderInitializationFailed
 		}
-		print("[\(Date())] Starting...")
+		print("[\(Date.now)] Starting...")
 		_ = Timer.scheduledTimer(withTimeInterval: self.interval, repeats: true) { (_) in
 			Task {
 				try await self.downloader!.saveSnapshot()

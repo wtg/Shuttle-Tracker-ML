@@ -28,7 +28,7 @@ final class Downloader {
 	}
 	
 	deinit {
-		print("[\(Date())] Stopping...")
+		print("[\(Date.now)] Stopping...")
 		try! self.fileHandle.close()
 	}
 	
@@ -44,7 +44,7 @@ final class Downloader {
 				guard let lineData = line.data(using: .utf8) else {
 					continue
 				}
-				print("[\(Date())] Saving snapshot of bus \(bus.id)...")
+				print("[\(Date.now)] Saving snapshot of bus \(bus.id)...")
 				try self.fileHandle.seekToEnd()
 				try self.fileHandle.write(contentsOf: lineData)
 			}
