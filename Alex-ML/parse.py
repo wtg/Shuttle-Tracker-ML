@@ -1,6 +1,6 @@
 import csv
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 csv_file = open('Data.csv', 'r')
@@ -32,23 +32,39 @@ csv_file.close()
 csv_file = open('Data_parsed.csv', 'r')
 data = csv.DictReader(csv_file)
 
-data_dict = {'ID':[], 'Latitude':[], 'Longitude':[], 'Time':[], 'Type':[]}
+data_dict = []
+
+sessions = 0
+id_check = ''
+prev_time = '0000-00-00 00:00:00 +0000'
 
 for line in data:
-    data_dict['ID'].append(line['ID'])
-    data_dict['Latitude'].append(line[' Latitude'])
-    data_dict['Longitude'].append(line[' Longitude'])
-    data_dict['Time'].append(line[' Time'][:20])
-    data_dict['Type'].append(line[' Type'])
 
+    if id_check != line['ID']:
+        session = 0
+        prev_time = line[' Time']
 
-df = pd.DataFrame(data_dict, columns = ['ID', 'Latitude', 'Longitude', 'Time', 'Type'])
-df['Time'] =  pd.to_datetime(df['Time'], format='%Y-%m-%d %H:%M:%S')
+    if prev_time == '0000-00-00 00:00:00 +0000':
+        prev_time = line[' Time']
 
-df['Session'] = (df.groupby('ID')['Time'].transform(lambda x: x.diff().dt.seconds.gt(300).cumsum()))
+    time_now =  pd.to_datetime(line[' Time'], utc = True)
+    time_prev = pd.to_datetime(prev_time, utc = True)
+    diff = (time_now - time_prev)
 
-csv_write = open('Data_session.csv', 'w')
+    if diff > timedelta(minutes = 10):
+        session += 1 
+        prev_time = time_now
+        line[' Session'] = session
+    else:
+        line[' Session'] = session
 
-df.to_csv('Data_session.csv', sep = ',',encoding='utf-8' )
+    id_check = line['ID']
+    data_dict.append(line)
 
-print(df)
+with open('Data_session.csv', 'w') as csv_file:  
+    writer = csv.writer(csv_file)
+    writer.writerow(['ID', 'Latitude', 'Longitude', 'Time', 'Type', 'Session'])
+    for i in data_dict:
+       writer.writerow([i['ID'], i[' Latitude'], i[' Longitude'], i[' Time'], i[' Type'], i[' Session']])
+
+csv_file.close()
