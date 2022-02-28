@@ -1,0 +1,41 @@
+MODULE 1:
+AI: the effort to automate intellectual task normally performed by human.
+    - Can computer think aside from hard coding?
+    - AI was just implemented rules
+    - stimulating intellectual human behavior
+    - Machine learning is part of AI:
+        - Figure the rules for human from data
+        - goal is to raise the accuracy
+        - Neural Network/ Deep Learning: a formed of machine learning that uses a layered representation of data
+            - data is going to transform into different layers
+            - multiple layers(usually only input and output layer for ML)
+            - Multi stage information extraction process
+            - not modeled after the brain (biological inspiration)
+        - Diffeent type of Machine Learning:
+            - Unsupervised Learning:
+                - only have some features for the model to come up with the label
+                - create different groupings for the features (cluster data points)
+            - Supervised Learning:
+                - Have some feature that refers to some sort of labels(pass through model)
+                    - Have both informations (to train the model)
+                - Regression
+                - Classification
+            - Reinforcement Learning:
+                - don't have any data, only have an agent, an environment, and a reward
+                - positive reward to encourage certain action, and negative reward to dicourage incorrect action
+                - agent goal is to maximize the amount of reward
+                - explore to figure out the environment
+    - Data: key thing to create models
+
+    MODULE 2:
+    Tensorflow: Open source Machine Learning Library
+        - allow people to create without deep mathmatical backgroud
+        - biggest Machine Learning library
+        - Graph: variables get added to the graph
+        - nothing is stored
+            - state the computation that we defined
+            - different computation can be relate to each other
+        - Session: a way to excute different aspect of the graph (evaluate)
+            - may be unable to use value because we didn't do session
+        
+
