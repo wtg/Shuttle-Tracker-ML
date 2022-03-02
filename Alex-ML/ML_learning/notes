@@ -11,7 +11,7 @@ AI: the effort to automate intellectual task normally performed by human.
             - multiple layers(usually only input and output layer for ML)
             - Multi stage information extraction process
             - not modeled after the brain (biological inspiration)
-        - Diffeent type of Machine Learning:
+        - Diffrent type of Machine Learning:
             - Unsupervised Learning:
                 - only have some features for the model to come up with the label
                 - create different groupings for the features (cluster data points)
@@ -37,5 +37,28 @@ AI: the effort to automate intellectual task normally performed by human.
             - different computation can be relate to each other
         - Session: a way to excute different aspect of the graph (evaluate)
             - may be unable to use value because we didn't do session
-        
-
+    Tensor:
+        - vector generalization of vector and matrics to potentially higher dimensions.
+        - Tensoflow represents tensor as n-dimention arrays of base datatype
+        - tensor is the fundmental aspect of tensorflow
+            - doesn't have a specific dimention
+            - shape: represents the dimension of data
+            - scaler: 1 value
+        - Rank/degree of tensor: number of dimension involved with the tensor
+            - rank 0 is just 1 value
+            - rank 1 is 1 array of values
+            - rank 2 is a list inside a list(matrics)
+            - and extraction
+            - can get rank with tf.rank(xxx)
+        - Shapes: the number of items we have in each dimensions
+            - xxx.shape([# of interior list, items in list, ...])
+            - tf.reshape(xxx, shape_new)
+            - -1 tells the tensor to calculate the size of the dimention in that place
+        - Contant, placeholder, sparseTensor are all immutable
+        - Variable is mutable
+    MODULE 3:
+    Core learning algorithms:
+        - Linear Regression Algorithm:
+            - one of the most basic form
+            - encode catagorical data to integer
+        - Epoches: the number of time that it look at the same data
