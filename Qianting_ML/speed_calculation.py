@@ -92,8 +92,9 @@ def parse_location(sorted_data):
     prev_name = sorted_data[0][0]
     for x in  sorted_data:
         current_name = x[0]
-        longitude = x[1]
-        temp_location = (x[1], x[2])
+        longitude = float(x[1])
+        latitude = float(x[2])
+        temp_location = (longitude, latitude)
         if (current_name == prev_name):
             location_sessions.append(temp_location)
         else:
