@@ -27,12 +27,6 @@ class Datapoint:
     def formatted(self):
         return np.array([self.lat, self.lon, self.time])
 
-    def timestamp(self):
-        return np.array([self.time])
-
-    def loc(self):
-        return np.array([self.lat, self.lon])
-
 if __name__ == "__main__":
 	random.seed()
     
@@ -41,24 +35,26 @@ if __name__ == "__main__":
 	rows = []
 	for row in csvreader:
 		rows.append(Datapoint(row[0], row[1], row[2], row[3], row[4]))
+
 	trips = []
-	currentTrips = {}
+	currentTimes, currentTrips = {}, {}
 	for dPoint in rows:
 		cID = dPoint.ID
 		if cID not in currentTrips:
-			currentTrips[cID] = [dPoint]
+			currentTrips[cID] = [dPoint.formatted()]
 		else:
-			timeDiff = dPoint.dt - currentTrips[cID][-1].dt
+			timeDiff = dPoint.dt - currentTimes[cID].dt
 			if int(str(timeDiff).split(":")[-2]) > 15:
 				trips.append(currentTrips[cID])
-				currentTrips[cID] = [dPoint]
+				currentTrips[cID] = [dPoint.formatted()]
 			else:
-				currentTrips[cID].append(dPoint)
+				currentTrips[cID].append(dPoint.formatted())
+		currentTimes[cID] = dPoint
 	for remainder in currentTrips:
 		trips.append(currentTrips[remainder])
 
 	indices = set()
-	while len(indices) < 200:
+	while len(indices) < round(len(trips)/10):
 		indices.add(random.randint(0, len(trips)))
 	trainX, trainY, testX, testY, i = [], [], [], [], 0
 	
