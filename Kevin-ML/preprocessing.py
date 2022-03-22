@@ -30,45 +30,74 @@ class Datapoint:
 if __name__ == "__main__":
 	random.seed()
     
+    #Read in and split data into user data(has uniform timestep) and system data
 	file = open("Data.csv")
 	csvreader = csv.reader(file)
-	rows = []
+	user_data, sys_data = [], []
 	for row in csvreader:
-		rows.append(Datapoint(row[0], row[1], row[2], row[3], row[4]))
-
-	trips = []
-	currentTimes, currentTrips = {}, {}
-	for dPoint in rows:
-		cID = dPoint.ID
-		if cID not in currentTrips:
-			currentTrips[cID] = [dPoint.formatted()]
+		if row[4] == 'user':
+			user_data.append(Datapoint(row[0], row[1], row[2], row[3], row[4]))
 		else:
-			timeDiff = dPoint.dt - currentTimes[cID].dt
-			if int(str(timeDiff).split(":")[-2]) > 15:
-				trips.append(currentTrips[cID])
-				currentTrips[cID] = [dPoint.formatted()]
-			else:
-				currentTrips[cID].append(dPoint.formatted())
-		currentTimes[cID] = dPoint
-	for remainder in currentTrips:
-		trips.append(currentTrips[remainder])
+			sys_data.append(Datapoint(row[0], row[1], row[2], row[3], row[4]))
 
+	#Split user data into trips - currently there are 1691 trips from early Spring 2022 data
+	current, trips = {}, []
+	for i in range(len(user_data)):
+		current_ID = user_data[i].ID
+		if i != 0:
+			if current_ID not in current:
+				current[current_ID] = [user_data[i].time, [user_data[i].formatted()]]
+			else:
+				#Maintain uniform time interval of 5 seconds
+				if (user_data[i].time - current[current_ID][0]) == 5:
+					current[current_ID][1].append(user_data[i].formatted())
+					current[current_ID][0] = user_data[i].time
+				else:
+					if len(current[current_ID][1]) > 1:
+						trips.append(current[current_ID][1])
+					current[current_ID] = [user_data[i].time, [user_data[i].formatted()]]
+		else:
+			current[user_data[i].ID] = [user_data[i].time, [user_data[i].formatted()]]
+	
+	#See if there are any system data points that have uniform time interval of 5 seconds
+	#As of early Spring 2022 data set, 139 trips meet this criteria
+	for i in range(len(sys_data)):
+		current_ID = sys_data[i].ID
+		if i != 0:
+			if current_ID not in current:
+				current[current_ID] = [sys_data[i].time, [sys_data[i].formatted()]]
+			else:
+				#Maintain uniform time interval of 5 seconds
+				if (sys_data[i].time - current[current_ID][0]) == 5:
+					current[current_ID][1].append(sys_data[i].formatted())
+					current[current_ID][0] = sys_data[i].time
+				else:
+					if len(current[current_ID][1]) > 1:
+						trips.append(current[current_ID][1])
+					current[current_ID] = [sys_data[i].time, [sys_data[i].formatted()]]
+		else:
+			current[sys_data[i].ID] = [sys_data[i].time, [sys_data[i].formatted()]]
+
+	#Split the 1830 total trips into training and testing set
 	indices = set()
 	while len(indices) < round(len(trips)/10):
 		indices.add(random.randint(0, len(trips)))
-	trainX, trainY, testX, testY, i = [], [], [], [], 0
-	
-	while i < len(trips):
-		if i in indices and len(trips[i]) > 1:
-			testX.append(trips[i][:len(trips[i])-1])
-			testY.append(trips[i][len(trips[i])-1])
-		elif i not in indices and len(trips[i]) > 1:
-			trainX.append(trips[i][:len(trips[i])-1])
-			trainY.append(trips[i][len(trips[i])-1])
-		i += 1
-    
+
+	trainX, trainY, testX, testY = [], [], [], []
+	for i in range(len(trips)):
+		if i in indices:
+			testX.append(trips[i])
+			testY.append(trips[i][1:])
+		else:
+			trainX.append(trips[i])
+			trainY.append(trips[i][1:])
+
+	print(len(trainX), len(trainY), len(testX), len(testY))
+
 	trainX = np.asanyarray(trainX, dtype=object)
+	trainY = np.asanyarray(trainY, dtype=object)
 	testX = np.asanyarray(testX, dtype=object)
+	testY = np.asanyarray(testY, dtype=object)
 	
 	np.save("trainX.npy", trainX)
 	np.save("trainY.npy", trainY)
