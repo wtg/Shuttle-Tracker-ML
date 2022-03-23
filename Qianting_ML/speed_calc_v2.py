@@ -1,8 +1,9 @@
 import csv
 import random
+from re import S
 import numpy as np
 import tensorflow as tf
-from datetime import datetime
+from datetime import datetime, date, time, timedelta
 
 # return datetime to string
 def convert_2_string(time_Var):
@@ -91,7 +92,7 @@ def readin():
     return data
 
 # return 1 if time gap > 10 min, else return 0;
-def timegap(a, b):
+def isBiggerThan10MIn(a, b):
     c = a - b
     sec_gap = c.total_seconds()
     min_gap = sec_gap / 60
@@ -100,6 +101,13 @@ def timegap(a, b):
     else:
         return 0
 
+# return timegap in minutes
+def timegap(a, b):
+    c = a - b
+    sec_gap = c.total_seconds()
+    min_gap = sec_gap / 60
+    return min_gap
+
 # categorize a bus that has two data whose time gap less than 10 min to be a session
 def getsession(data):
     sessions = []
@@ -107,7 +115,7 @@ def getsession(data):
     prev_id = data[0][0]
     prev_time = data[0][3]
     for i in range(len(data)):
-        timeGap = timegap(data[i][3], prev_time)
+        timeGap = isBiggerThan10MIn(data[i][3], prev_time)
         if ((prev_id == data[i][0]) and (timeGap == 0)):
             one_session.append(data[i])
             prev_time = data[i][3]
@@ -115,11 +123,21 @@ def getsession(data):
             if (len(one_session) > 1):
                 sessions.append(one_session)
             one_session = []
+            one_session.append(data[i])
             prev_id = data[i][0]
             prev_time = data[i][3]
 
     return sessions
 
+# convert datetime in each data into float (the time gap between start time and current time)
+def datetime2Float(sessions):
+    start_t = sessions[0][0][3]
+    for data in sessions:
+        for per_data in data:
+            timeGap = timegap(per_data[3], start_t)
+            per_data[3] = timeGap
+    return sessions
+    
 # catagorize train and test set
 def train_test(sessions):
     train = []
@@ -147,15 +165,33 @@ def trainTest_XY(train, test):
         train_len = len(i)
         x_len = (int)(train_len / 5 * 4)
         train_x.append(i[:x_len])
-        train_y.append(i[x_len])
-    
+        train_y.append(i[x_len:])
+
     for j in test:
         test_len = len(j)
-        j_len = (int)(test_len / 5 * 4)
-        test_x.append(j[:j_len])
-        test_y.append(j[j_len:])
-    
+        y_len = (int)(test_len / 5 * 4)
+        test_x.append(i[:y_len])
+        test_y.append(i[y_len:])
+
     return train_x, train_y, test_x, test_y
+
+# convert trainx trainy testx testy into tensor
+def convertArray(trainx, trainy, testx, testy):
+    TrainX = np.array(trainx, dtype=object)
+    TrainX = tf.ragged.constant(TrainX)
+
+    TrainY = np.array(trainy, dtype=object)
+    TrainY = tf.ragged.constant(TrainY)
+
+    TstX = np.array(testx, dtype=object)
+    TstX = tf.ragged.constant(TstX)
+
+    TstY = np.array(testy, dtype=object)
+    TstY = tf.ragged.constant(TstY)
+
+    return TrainX, TrainY, TstX, TstY
+
+
 
 if __name__ == "__main__":
     # read in the data and sort by id and time
@@ -165,11 +201,18 @@ if __name__ == "__main__":
     # group datas into sessions of minute gap less than 10 min
     sessions = getsession(data)
 
+    # convert datetime into float by calculating the timegap between the starttime and the current time
+    sessions = datetime2Float(sessions)
+
     # get train and test set for sessions
     train, test = train_test(sessions)
 
     # get tainx trainy, and testx testy sets
     train_x, train_y, test_x, test_y = trainTest_XY(train, test)
 
-    print(data)
-    
+    # convert trainx, trainy, testx, testy into tensor
+    TrainX, TrainY, TstX, TstY = convertArray(train_x, train_y, test_x, test_y)
+
+    print(TrainX)
+
+
