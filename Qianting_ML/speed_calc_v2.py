@@ -1,9 +1,10 @@
 import csv
 import random
-from re import S
 import numpy as np
 import tensorflow as tf
-from datetime import datetime, date, time, timedelta
+from datetime import datetime
+from tensorflow import keras
+from tensorflow.keras import layers
 
 # return datetime to string
 def convert_2_string(time_Var):
@@ -120,7 +121,7 @@ def getsession(data):
             one_session.append(data[i])
             prev_time = data[i][3]
         else:
-            if (len(one_session) > 1):
+            if (len(one_session) >= 2):
                 sessions.append(one_session)
             one_session = []
             one_session.append(data[i])
@@ -162,16 +163,14 @@ def trainTest_XY(train, test):
     test_x = []
     test_y = []
     for i in train:
-        train_len = len(i)
-        x_len = (int)(train_len / 5 * 4)
-        train_x.append(i[:x_len])
-        train_y.append(i[x_len:])
+        train_len = len(i) - 1
+        train_x.append(i[:train_len])
+        train_y.append(i[train_len])
 
     for j in test:
-        test_len = len(j)
-        y_len = (int)(test_len / 5 * 4)
-        test_x.append(i[:y_len])
-        test_y.append(i[y_len:])
+        test_len = len(j) - 1
+        test_x.append(j[:test_len])
+        test_y.append(j[test_len])
 
     return train_x, train_y, test_x, test_y
 
@@ -180,14 +179,12 @@ def convertArray(trainx, trainy, testx, testy):
     TrainX = np.array(trainx, dtype=object)
     TrainX = tf.ragged.constant(TrainX)
 
-    TrainY = np.array(trainy, dtype=object)
-    TrainY = tf.ragged.constant(TrainY)
+    TrainY = tf.convert_to_tensor(trainy, dtype='float32')
 
     TstX = np.array(testx, dtype=object)
     TstX = tf.ragged.constant(TstX)
 
-    TstY = np.array(testy, dtype=object)
-    TstY = tf.ragged.constant(TstY)
+    TstY = tf.convert_to_tensor(test_y, dtype='float32')
 
     return TrainX, TrainY, TstX, TstY
 
@@ -213,6 +210,23 @@ if __name__ == "__main__":
     # convert trainx, trainy, testx, testy into tensor
     TrainX, TrainY, TstX, TstY = convertArray(train_x, train_y, test_x, test_y)
 
-    print(TrainX)
+    # pad the ragged data into matrixes
+    padded_trainX = TrainX.to_tensor(0.)
+    padded_TstX = TstX.to_tensor(0.)
+
+    print("shape is ", padded_trainX.shape)
+    print("shape for test is ", padded_TstX.shape)
+    print(TrainY)
+
+    # build models
+    model = tf.keras.models.Sequential()
+    model.add(tf.keras.layers.InputLayer((None, 4)))
+    model.add(layers.SimpleRNN(512, return_sequences = True, activation='relu'))
+    model.add(layers.SimpleRNN(512, activation='relu'))
+    model.add(layers.Dense(4))
+    model.compile(loss = tf.keras.losses.MeanSquaredError(), optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), metrics=['accuracy'])
+
+    model.fit(padded_trainX, TrainY, batch_size=10, epochs=10)
+    model.summary()
 
 
