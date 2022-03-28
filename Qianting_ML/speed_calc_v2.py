@@ -132,10 +132,11 @@ def getsession(data):
 
 # convert datetime in each data into float (the time gap between start time and current time)
 def datetime2Float(sessions):
-    start_t = sessions[0][0][3]
     for data in sessions:
+        prev_t = data[0][3]
         for per_data in data:
-            timeGap = timegap(per_data[3], start_t)
+            timeGap = timegap(per_data[3], prev_t)
+            prev_t = per_data[3]
             per_data[3] = timeGap
     return sessions
     
@@ -166,6 +167,9 @@ def trainTest_XY(train, test):
         train_len = len(i) - 1
         train_x.append(i[:train_len])
         train_y.append(i[train_len])
+
+        if (i == 60):
+            break
 
     for j in test:
         test_len = len(j) - 1
@@ -207,6 +211,7 @@ if __name__ == "__main__":
     # get tainx trainy, and testx testy sets
     train_x, train_y, test_x, test_y = trainTest_XY(train, test)
 
+
     # convert trainx, trainy, testx, testy into tensor
     TrainX, TrainY, TstX, TstY = convertArray(train_x, train_y, test_x, test_y)
 
@@ -214,19 +219,17 @@ if __name__ == "__main__":
     padded_trainX = TrainX.to_tensor(0.)
     padded_TstX = TstX.to_tensor(0.)
 
-    print("shape is ", padded_trainX.shape)
-    print("shape for test is ", padded_TstX.shape)
-    print(TrainY)
-
     # build models
-    model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.InputLayer((None, 4)))
-    model.add(layers.SimpleRNN(512, return_sequences = True, activation='relu'))
-    model.add(layers.SimpleRNN(512, activation='relu'))
-    model.add(layers.Dense(4))
-    model.compile(loss = tf.keras.losses.MeanSquaredError(), optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), metrics=['accuracy'])
+    inputs = tf.keras.Input((None, 4))
+    x1 = tf.keras.layers.SimpleRNN(512, return_sequences = True, dropout=0.01, activation='relu')(inputs)
+    x2 = tf.keras.layers.SimpleRNN(512, activation='relu')(x1)
+    outputs = tf.keras.layers.Dense(4)(x2)
+    model = tf.keras.Model(inputs=inputs,outputs=outputs)
+
+    model.compile(loss = tf.keras.losses.MeanAbsolutePercentageError(), optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), metrics=['accuracy'])
+    #model.compile(loss = tf.keras.losses.MeanSquaredError(), optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), metrics=['accuracy'])
 
     model.fit(padded_trainX, TrainY, batch_size=10, epochs=10)
+
+    model.evaluate(TstX, TstY, batch_size=10, verbose=0)
     model.summary()
-
-
