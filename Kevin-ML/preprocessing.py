@@ -25,13 +25,13 @@ class Datapoint:
     
 
     def formatted(self):
-        return np.array([self.lat, self.lon, self.time])
+        return np.array([self.lat, self.lon])
 
 if __name__ == "__main__":
 	random.seed()
     
     #Read in and split data into user data(has uniform timestep) and system data
-	file = open("Data.csv")
+	file = open("Data2.csv")
 	csvreader = csv.reader(file)
 	user_data, sys_data = [], []
 	for row in csvreader:
@@ -78,7 +78,17 @@ if __name__ == "__main__":
 		else:
 			current[sys_data[i].ID] = [sys_data[i].time, [sys_data[i].formatted()]]
 
-	#Split the 1830 total trips into training and testing set
+	#Split longer trips into trips of length 10 with overlap (to have more data points)
+	newtrips = []
+	for i in range(len(trips)):
+		if len(trips[i]) == 6:
+			newtrips.append(trips[i])
+		elif len(trips[i]) > 6:
+			for j in range(len(trips[i])-6):
+				newtrips.append(trips[i][j:j+6])
+	trips = newtrips
+
+	#Split the total trips into training and testing set
 	indices = set()
 	while len(indices) < round(len(trips)/10):
 		indices.add(random.randint(0, len(trips)))
@@ -86,11 +96,11 @@ if __name__ == "__main__":
 	trainX, trainY, testX, testY = [], [], [], []
 	for i in range(len(trips)):
 		if i in indices:
-			testX.append(trips[i])
-			testY.append(trips[i][1:])
+			testX.append(trips[i][:len(trips[i])-1])
+			testY.append(trips[i][-1])
 		else:
-			trainX.append(trips[i])
-			trainY.append(trips[i][1:])
+			trainX.append(trips[i][:len(trips[i])-1])
+			trainY.append(trips[i][-1])
 
 	print(len(trainX), len(trainY), len(testX), len(testY))
 
