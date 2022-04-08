@@ -29,9 +29,9 @@ class Datapoint:
 
 if __name__ == "__main__":
 	random.seed()
-    
+	filename = input("Enter datafile(csv): ")
     #Read in and split data into user data(has uniform timestep) and system data
-	file = open("Data2.csv")
+	file = open(filename)
 	csvreader = csv.reader(file)
 	user_data, sys_data = [], []
 	for row in csvreader:

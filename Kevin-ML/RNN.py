@@ -20,36 +20,24 @@ model.add(tf.keras.layers.LSTM(128))
 model.add(tf.keras.layers.Dense(2))
 
 model.compile(optimizer='adam', loss='MSE', metrics = ['MeanAbsolutePercentageError'])
-
-output = model.fit(trainX, trainY, batch_size=64, epochs=30, validation_data=(testX, testY))
+num_epoch = int(input("Enter number of epochs for model: "))
+output = model.fit(trainX, trainY, batch_size=64, epochs=num_epoch, validation_data=(testX, testY))
 model.save("trained_model")
-x_axis = range(30)
+#model.summary()
+x_axis = range(num_epoch)
 loss = output.history['loss']
+acc = output.history['mean_absolute_percentage_error']
 val_loss = output.history['val_loss']
+val_acc = output.history['val_mean_absolute_percentage_error']
 
 
 plt.figure(0)
 plt.plot(x_axis, loss)
-plt.savefig('train_loss.png')
-plt.figure(1)
+plt.figure(0)
 plt.plot(x_axis, val_loss)
-plt.savefig('val_loss.png')
-
-'''
-#Convert numpy arrays to tensors
-trainX = tf.ragged.constant(trainX, dtype=tf.float32)
-trainY = tf.ragged.constant(trainY, dtype=tf.float32)
-testX = tf.ragged.constant(testX, dtype=tf.float32)
-testY = tf.ragged.constant(testY, dtype=tf.float32)
-
-lengths = {}
-for trip in trainX:
-	if trip.shape[0] not in lengths:
-		lengths[trip.shape[0]] = 1
-	else:
-		lengths[trip.shape[0]] += 1
-keys = lengths.keys()
-keys = sorted(keys)
-for key in keys:
-	print(key, lengths[key])
-'''
+plt.savefig('loss.png')
+plt.figure(1)
+plt.plot(x_axis, acc)
+plt.figure(1)
+plt.plot(x_axis, val_acc)
+plt.savefig('err.png')
