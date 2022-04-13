@@ -1,6 +1,8 @@
 import csv
 import random
+from sqlite3 import DatabaseError
 import numpy as np
+from requests import Session
 import tensorflow as tf
 from datetime import datetime
 from tensorflow import keras
@@ -118,13 +120,15 @@ def getsession(data):
     for i in range(len(data)):
         timeGap = isBiggerThan10MIn(data[i][3], prev_time)
         if ((prev_id == data[i][0]) and (timeGap == 0)):
-            one_session.append(data[i])
+            one_session.append(data[i][1:])
+            #one_session.append(data[i])
             prev_time = data[i][3]
         else:
             if (len(one_session) >= 2):
                 sessions.append(one_session)
             one_session = []
-            one_session.append(data[i])
+            #one_session.append(data[i])
+            one_session.append(data[i][1:])
             prev_id = data[i][0]
             prev_time = data[i][3]
 
@@ -133,13 +137,21 @@ def getsession(data):
 # convert datetime in each data into float (the time gap between start time and current time)
 def datetime2Float(sessions):
     for data in sessions:
-        prev_t = data[0][3]
+        #data = sorted(data, key=lambda x: (x[2]))
+
+        #prev_t = data[0][3]
+        prev_t = data[0][2]
+
         for per_data in data:
-            timeGap = timegap(per_data[3], prev_t)
-            prev_t = per_data[3]
-            per_data[3] = timeGap
+            #timeGap = timegap(per_data[3], prev_t)
+            #prev_t = per_data[3]
+            #per_data[3] = timeGap
+            timeGap = timegap(per_data[2], prev_t)
+            prev_t = per_data[2]
+            per_data[2] = timeGap
+
     return sessions
-    
+
 # catagorize train and test set
 def train_test(sessions):
     train = []
@@ -147,7 +159,7 @@ def train_test(sessions):
     session_len = len(sessions)
     train_num = (int)(session_len / 5 * 4)
     while (len(train) != train_num):
-        index = random.randint(0, train_num)
+        index = random.randint(0, session_len - 1)
         if sessions[index] not in train:
             train.append(sessions[index])
 
@@ -167,9 +179,6 @@ def trainTest_XY(train, test):
         train_len = len(i) - 1
         train_x.append(i[:train_len])
         train_y.append(i[train_len])
-
-        if (i == 60):
-            break
 
     for j in test:
         test_len = len(j) - 1
@@ -193,46 +202,68 @@ def convertArray(trainx, trainy, testx, testy):
     return TrainX, TrainY, TstX, TstY
 
 
-
 if __name__ == "__main__":
     # read in the data and sort by id and time
     data = readin()
     data = sorted(data, key=lambda x: (x[0], x[3]))
 
-    # group datas into sessions of minute gap less than 10 min
+    # remove id, and group datas into sessions of minute gap less than 10 min
     sessions = getsession(data)
 
     # convert datetime into float by calculating the timegap between the starttime and the current time
     sessions = datetime2Float(sessions)
 
+    print("finished sessions!!!!!!!")
+
     # get train and test set for sessions
     train, test = train_test(sessions)
+
+    print("finishd train, test!!!!!!!!!!!!!!!!!")
 
     # get tainx trainy, and testx testy sets
     train_x, train_y, test_x, test_y = trainTest_XY(train, test)
 
-
+    print("finished trainx, trainy, testx, testy!!!!!!!!!!!!")
+    
     # convert trainx, trainy, testx, testy into tensor
     TrainX, TrainY, TstX, TstY = convertArray(train_x, train_y, test_x, test_y)
+
+    print("finished padded")
 
     # pad the ragged data into matrixes
     padded_trainX = TrainX.to_tensor(0.)
     padded_TstX = TstX.to_tensor(0.)
 
-    print("shape is ", padded_trainX.shape)
-    print("shape for test is ", padded_TstX.shape)
-    print(TrainY)
-
+   
     # build models
-    inputs = tf.keras.Input((None, 4))
-    x1 = tf.keras.layers.SimpleRNN(512, return_sequences = True, activation='relu')(inputs)
-    x2 = tf.keras.layers.SimpleRNN(512, activation='relu')(x1)
-    outputs = tf.keras.layers.Dense(4)(x2)
+    inputs = tf.keras.Input((None, 3))
+    #x1 = tf.keras.layers.Dense(8)(inputs)
+    #x2 = tf.keras.layers.Dropout(0.02)(x1) 
+    #x2 = tf.keras.layers.Dense(3)(x1)
+    #x3 = tf.keras.layers.BatchNormalization()(x2)
+    x2 = tf.keras.layers.LSTM(64, return_sequences=True)(inputs)
+    x4 = tf.keras.layers.LSTM(64, return_sequences=False)(x2)
+    #x1 = tf.keras.layers.SimpleRNN(64, dropout=0.5, activation='linear')(inputs)
+    #outputs = tf.keras.layers.Dense(3)(x1)
+    #x6 = tf.keras.layers.LayerNormalization()(x4)
+    #x6 = tf.keras.layers.Dense(8)(x4)
+    #x8 = tf.keras.layers.Dropout(0.2)(x4) 
+    outputs = tf.keras.layers.Dense(3)(x4)
     model = tf.keras.Model(inputs=inputs,outputs=outputs)
 
-    model.compile(loss = tf.keras.losses.MeanSquaredError(), optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), metrics=['accuracy'])
-    model.fit(padded_trainX, TrainY, batch_size=10, epochs=10)
-    results = model.evaluate(padded_TstX, TstY, batch_size=10)
+    model.compile(loss = tf.keras.losses.MeanSquaredError(), optimizer = tf.keras.optimizers.Adam(learning_rate = 0.003), metrics=['acc','mae'])
+    #model.compile(loss = tf.keras.losses.MeanAbsolutePercentageError(), optimizer = tf.keras.optimizers.Adam(learning_rate = 0.003), metrics=['mse','mae'])
 
+    cp = tf.keras.callbacks.ModelCheckpoint("best_model", monitor = 'val_loss', save_best_only=True, save_freq='epoch')
+    history = model.fit(padded_trainX, TrainY, batch_size=8, epochs=30, callbacks = [cp], validation_split=0.1)
+    #history = model.fit(padded_trainX, TrainY, epochs=30, callbacks = [cp], validation_split=0.1)
     model.summary()
 
+    result = model.evaluate(TstX, TstY, callbacks = [cp])
+    #result = model.evaluate(TstX, TstY)
+    print("test loss, test acc:", result)
+
+    predictions = model.predict(TstX[10:20])
+    print("predictions shape:", predictions.shape, ", result: \n", predictions)
+    print("\n__\nanser:\n\n\n\n", TstY[10:20])
+    print("\n__\ntestx:\n", TstX[10:20])
