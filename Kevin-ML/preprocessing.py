@@ -102,7 +102,7 @@ if __name__ == "__main__":
 			trainX.append(trips[i][:len(trips[i])-1])
 			trainY.append(trips[i][-1])
 
-	print(len(trainX), len(trainY), len(testX), len(testY))
+	print(len(trainX), len(testX))
 
 	trainX = np.asanyarray(trainX, dtype=object)
 	trainY = np.asanyarray(trainY, dtype=object)
