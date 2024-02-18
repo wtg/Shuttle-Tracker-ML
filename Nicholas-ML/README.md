@@ -13,3 +13,9 @@ https://chat.openai.com/
 
     change tuple value python
 
+    math infinite python
+
+    std::map in python
+    convert 2021-11-02 21:17:37 +0000 to a single integer. no modulo datatime
+    add a key to the map
+    iterate through map
