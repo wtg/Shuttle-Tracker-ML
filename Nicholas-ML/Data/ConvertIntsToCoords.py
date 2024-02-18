@@ -2,7 +2,7 @@ import sys
 from sklearn.neighbors import KDTree
 if (len(sys.argv) < 3):
     print("Have the command line arguments be the file you want to read from and the file you want to write to as.")
-    exit()
+    exit(1)
 fileToReadFrom = sys.argv[1]
 fileToWriteTo = sys.argv[2]
 #ask what column is on input position
