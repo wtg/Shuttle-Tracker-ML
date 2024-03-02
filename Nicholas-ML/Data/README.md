@@ -11,8 +11,8 @@ Input:
 python ADataProcessor.py Output.csv output
 ```
 Output:<br>
-  - output/AllBusses.txt. A file containing all the buses data from the table. The time is now represented as an int and the field for "user" or "system" is gone.
-  - output/BusXXX.txt. A file containing only buses XXX information. It is organized the same as above, but the bus ID isn't inside each row anymore.
+  - output/AllBusses.csv. A file containing all the buses data from the table. The time is now represented as an int and the field for "user" or "system" is gone. It then has its next position and time it takes to get there for output for the machine learning.
+  - output/BusXXX.csv. A file containing only buses XXX information. It is organized the same as above, but the bus ID isn't inside each row anymore.
 
 
 # AutoConvertCoords.py
