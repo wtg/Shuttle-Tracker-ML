@@ -46,13 +46,25 @@ with open(filename, 'r') as fileRead:
             temp.append(splitUp[i])
         mapOfData[busNumber].append(temp)
 
-
 def custom_sort(item):
     return item[indexForTimeInArray]
-with open("./" + folder + "/AllBusses.txt", 'w') as fileAll:       
+
+# Adds outputs parameters
+for key in mapOfData:
+    mapOfData[key] = sorted(mapOfData[key], key=custom_sort)
+    for i in range(len(mapOfData[key])):
+        if (i == 0):
+            continue
+        nextPos = mapOfData[key][i][0]
+        timeDif = mapOfData[key][i][1] - mapOfData[key][i-1][1]
+        mapOfData[key][i-1].append(nextPos)
+        mapOfData[key][i-1].append(timeDif)
+    mapOfData[key] = mapOfData[key][0:-1]
+
+with open("./" + folder + "/AllBusses.csv", 'w') as fileAll:       
     for key in mapOfData:
         mapOfData[key] = sorted(mapOfData[key], key=custom_sort)
-        with open("./" + folder + "/bus" + key + ".txt", 'w') as file1:    
+        with open("./" + folder + "/bus" + key + ".csv", 'w') as file1:    
             for i in range(len(mapOfData[key])):
                 fileAll.write(key)
                 for j in range(len(mapOfData[key][i])):
